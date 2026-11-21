@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tic Tac Toe</title>
+  <meta name="description" content="Play tic tac toe in your browser against a friend or the computer.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app">
+    <h1>Tic Tac Toe</h1>
+
+    <div class="controls">
+      <div class="segmented" role="group" aria-label="Game mode">
+        <button type="button" class="mode active" data-mode="cpu">vs Computer</button>
+        <button type="button" class="mode" data-mode="pvp">2 Players</button>
+      </div>
+      <label class="difficulty" id="difficultyWrap">
+        Difficulty
+        <select id="difficulty">
+          <option value="easy">Easy</option>
+          <option value="medium" selected>Medium</option>
+          <option value="hard">Unbeatable</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="scoreboard" aria-live="polite">
+      <div class="score x"><span class="label" id="labelX">You (X)</span><span class="value" id="scoreX">0</span></div>
+      <div class="score draw"><span class="label">Draws</span><span class="value" id="scoreDraw">0</span></div>
+      <div class="score o"><span class="label" id="labelO">Computer (O)</span><span class="value" id="scoreO">0</span></div>
+    </div>
+
+    <p class="status" id="status" aria-live="polite">Your turn</p>
+
+    <div class="board" id="board" role="grid" aria-label="Tic tac toe board"></div>
+
+    <div class="actions">
+      <button type="button" class="primary" id="newRound">New round</button>
+      <button type="button" class="ghost" id="resetScores">Reset scores</button>
+    </div>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
