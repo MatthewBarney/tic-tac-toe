@@ -7,7 +7,7 @@ A simple, responsive tic tac toe game that runs in the browser. No build step, n
 ## Features
 
 - Play against the computer (Easy, Medium, or Unbeatable) or another person on the same device
-- Score tracking with wins and draws
+- Score tracking with wins and draws, saved in your browser (`localStorage`) so they survive a refresh. Scores are kept separately for each mode, along with your last mode and difficulty. Nothing is sent anywhere.
 - Winning line highlight
 - Starting player alternates each round
 - Works on phones and desktops, with automatic dark mode

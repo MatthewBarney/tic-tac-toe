@@ -17,13 +17,62 @@
     draw: document.getElementById("scoreDraw"),
   };
 
+  // ---- Saved settings (localStorage) ----
+  // Scores are kept separately for each mode so switching modes doesn't wipe them.
+
+  const STORAGE_KEY = "tictactoe:v1";
+  const DIFFICULTIES = ["easy", "medium", "hard"];
+  const emptyScores = () => ({ X: 0, O: 0, draw: 0 });
+  const cleanCount = (n) => (Number.isInteger(n) && n >= 0 ? n : 0);
+  const cleanScores = (s) => ({
+    X: cleanCount(s && s.X),
+    O: cleanCount(s && s.O),
+    draw: cleanCount(s && s.draw),
+  });
+
+  function loadSaved() {
+    const saved = {
+      mode: "cpu",
+      difficulty: "medium",
+      scores: { cpu: emptyScores(), pvp: emptyScores() },
+    };
+    try {
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
+      if (data && typeof data === "object") {
+        if (data.mode === "cpu" || data.mode === "pvp") saved.mode = data.mode;
+        if (DIFFICULTIES.includes(data.difficulty)) saved.difficulty = data.difficulty;
+        saved.scores.cpu = cleanScores(data.scores && data.scores.cpu);
+        saved.scores.pvp = cleanScores(data.scores && data.scores.pvp);
+      }
+    } catch (e) {
+      // Storage unavailable or corrupted: fall back to defaults.
+    }
+    return saved;
+  }
+
+  function save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        mode: state.mode,
+        difficulty: difficultyEl.value,
+        scores: scoresByMode,
+      }));
+    } catch (e) {
+      // Storage blocked or full: the game still works, just without saving.
+    }
+  }
+
+  const saved = loadSaved();
+  const scoresByMode = saved.scores;
+  difficultyEl.value = saved.difficulty;
+
   const state = {
     board: Array(9).fill(null),
     turn: "X",
     over: false,
-    mode: "cpu",            // "cpu" or "pvp"
+    mode: saved.mode,       // "cpu" or "pvp"
     starter: "X",           // who moves first this round (alternates)
-    scores: { X: 0, O: 0, draw: 0 },
+    scores: scoresByMode[saved.mode],
   };
 
   // Build the 9 cells once.
@@ -96,6 +145,7 @@
         state.scores.draw++;
         statusEl.textContent = "It's a draw.";
       }
+      save();
     } else {
       state.turn = state.turn === "X" ? "O" : "X";
       setStatus();
@@ -173,20 +223,23 @@
     difficultyWrap.classList.toggle("hidden", mode !== "cpu");
     labelX.textContent = mode === "cpu" ? "You (X)" : "Player X";
     labelO.textContent = mode === "cpu" ? "Computer (O)" : "Player O";
-    state.scores = { X: 0, O: 0, draw: 0 };
+    state.scores = scoresByMode[mode];
     state.starter = "X";
+    save();
     newRound({ alternate: false });
   }
 
   document.querySelectorAll(".mode").forEach((b) => {
     b.addEventListener("click", () => setMode(b.dataset.mode));
   });
+  difficultyEl.addEventListener("change", save);
   document.getElementById("newRound").addEventListener("click", () => newRound());
   document.getElementById("resetScores").addEventListener("click", () => {
-    state.scores = { X: 0, O: 0, draw: 0 };
+    Object.assign(state.scores, emptyScores());
     state.starter = "X";
+    save();
     newRound({ alternate: false });
   });
 
-  setMode("cpu");
+  setMode(state.mode);
 })();
