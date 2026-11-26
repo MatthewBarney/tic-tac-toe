@@ -1,23 +1,153 @@
 <!doctype html>
+<!--
+  =====================================================================
+  HOW A WEBSITE IS BUILT (read this first!)
+  =====================================================================
+  A web page is usually made from three kinds of files that work together:
+
+    1. index.html  (THIS FILE)  - the STRUCTURE and CONTENT: what is on the
+                                  page (headings, buttons, text).
+                                  Think of it as the skeleton of a body.
+    2. style.css                - the LOOK: colors, sizes, spacing, fonts.
+                                  Think of it as clothes and makeup.
+    3. script.js                - the BEHAVIOR: what happens when you click
+                                  something. Think of it as the muscles
+                                  and brain.
+
+  HTML stands for "HyperText Markup Language". It is not a programming
+  language that "does" things; it is a way of LABELING parts of a page.
+  You label things using "tags", which are words inside angle brackets,
+  like <h1> or <button>. Most tags come in pairs: an opening tag <h1> and
+  a closing tag </h1>, and whatever sits between them is the content.
+  Tags can contain other tags, like boxes nested inside bigger boxes.
+
+  An "attribute" is extra information written inside an opening tag, such
+  as class="board". It looks like  name="value".
+
+  A "comment" (like this whole block) is a note for humans. The browser
+  ignores everything between the "less-than, exclamation mark, dash, dash"
+  that starts a comment and the "dash, dash, greater-than" that ends it.
+  Comments never show up on the page.
+  =====================================================================
+-->
+<!--
+  The line above, "doctype html", simply tells the browser "this page is
+  written in modern HTML". It must stay at the very top of the file.
+-->
+
+<!--
+  The <html> tag wraps the ENTIRE page. lang="en" says the page is written
+  in English, which helps screen readers (software that reads pages aloud
+  for people who are blind or have low vision) pronounce words correctly
+  and helps browsers offer translation.
+-->
 <html lang="en">
+
+<!--
+  <head> holds BEHIND-THE-SCENES information about the page. Nothing
+  inside <head> is drawn on the screen (apart from the title that shows
+  in the browser tab).
+-->
 <head>
+  <!--
+    "charset" is short for "character set". utf-8 is a standard way of
+    storing text that lets the page correctly show letters from any
+    language, plus symbols and emoji (like the party popper in the win
+    message).
+  -->
   <meta charset="utf-8">
+
+  <!--
+    The "viewport" setting makes the page fit nicely on phones. Without it,
+    phones pretend to be a wide desktop screen and shrink everything down
+    to be tiny. "width=device-width" means "use the real width of this
+    device", and "initial-scale=1" means "start at normal zoom".
+  -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- The title appears on the browser tab and in the bookmarks list. -->
   <title>Tic Tac Toe</title>
+
+  <!--
+    A short summary of the page. Search engines like Google often show
+    this text under the page's name in search results.
+  -->
   <meta name="description" content="Play tic tac toe in your browser against a friend or the computer.">
+
+  <!--
+    This line connects the look file (style.css) to this page. "rel" says
+    how the linked file relates to this page (it is a stylesheet), and
+    "href" is the file's location. Because it is just a file name with no
+    folders, the browser looks for it next to this file.
+  -->
   <link rel="stylesheet" href="style.css">
 </head>
+
+<!--
+  <body> holds everything that is actually VISIBLE on the page.
+-->
 <body>
+  <!--
+    <main> marks the main content of the page. It does not change how
+    anything looks; it is a label that helps screen readers jump straight
+    to the important part. class="app" is a nickname that style.css uses
+    to find this box and style it. (A "class" is a reusable label that
+    many elements can share.)
+  -->
   <main class="app">
+    <!-- The big title at the top of the game. <h1> means "heading level 1", the most important heading. -->
     <h1>Tic Tac Toe</h1>
 
+    <!--
+      SECTION: game settings.
+      <div> is a plain, invisible box used to group things together so
+      they can be moved or styled as one unit.
+    -->
     <div class="controls">
+      <!--
+        The two buttons that choose who you play against. role="group"
+        and aria-label="Game mode" are "accessibility" attributes:
+        extra descriptions that screen readers announce so that people who
+        cannot see the page know these two buttons belong together and
+        what they are for. ("aria" is a standard set of such labels.)
+      -->
       <div class="segmented" role="group" aria-label="Game mode">
+        <!--
+          A <button> is something you can click. type="button" says it
+          is just a normal button (not one that submits a form).
+
+          data-mode="cpu" is a "data attribute": a custom note we attach
+          to an element so that script.js can read it later. Here it
+          records which game mode this button picks. "cpu" means
+          the computer (short for Central Processing Unit, the chip
+          that does the thinking inside a computer).
+
+          The "active" class marks this button as the currently selected
+          one when the page first loads.
+        -->
         <button type="button" class="mode active" data-mode="cpu">vs Computer</button>
+        <!-- "pvp" is short for "player versus player": two humans taking turns on one screen. -->
         <button type="button" class="mode" data-mode="pvp">2 Players</button>
       </div>
+
+      <!--
+        A drop-down menu for choosing how smart the computer is. The
+        <label> tag describes the menu next to it.
+
+        id="difficultyWrap" gives this element a unique name (an "id").
+        Unlike a class, an id may be used only once per page, so
+        script.js can find this exact element. The script hides it when
+        you are playing against another person, since difficulty only
+        matters when playing the computer.
+      -->
       <label class="difficulty" id="difficultyWrap">
         Difficulty
+        <!--
+          <select> creates a drop-down menu and each <option> is one
+          choice in it. The "value" is the behind-the-scenes word the
+          script reads; the text between the tags is what you see.
+          "selected" makes Medium the choice shown at first.
+        -->
         <select id="difficulty">
           <option value="easy">Easy</option>
           <option value="medium" selected>Medium</option>
@@ -26,22 +156,64 @@
       </label>
     </div>
 
+    <!--
+      SECTION: the scoreboard, with three boxes for X wins, draws, and
+      O wins.
+
+      aria-live="polite" tells screen readers "when the text in this area
+      changes, announce it, but wait until you are done speaking first".
+      This way a blind player hears about score changes.
+    -->
     <div class="scoreboard" aria-live="polite">
+      <!--
+        Each score box has two <span> pieces. A <span> is an invisible
+        wrapper around a small piece of text so it can be styled or
+        changed separately. The "label" is the name and the "value" is
+        the number. The ids (labelX, scoreX, and so on) let script.js
+        update the text. The starting numbers here are 0 and the script
+        replaces them with your saved scores when the page loads.
+      -->
       <div class="score x"><span class="label" id="labelX">You (X)</span><span class="value" id="scoreX">0</span></div>
       <div class="score draw"><span class="label">Draws</span><span class="value" id="scoreDraw">0</span></div>
       <div class="score o"><span class="label" id="labelO">Computer (O)</span><span class="value" id="scoreO">0</span></div>
     </div>
 
+    <!--
+      A line of text that tells the player what is happening, such as
+      "Your turn" or "It's a draw." <p> means "paragraph". The script
+      changes this text during play, and aria-live="polite" makes screen
+      readers announce each change.
+    -->
     <p class="status" id="status" aria-live="polite">Your turn</p>
 
+    <!--
+      SECTION: the game board itself.
+
+      This box is deliberately EMPTY in the HTML. script.js creates the
+      nine squares and puts them in here when the page loads. role="grid"
+      and aria-label describe it to screen readers as a grid, just like a
+      real tic tac toe board.
+    -->
     <div class="board" id="board" role="grid" aria-label="Tic tac toe board"></div>
 
+    <!--
+      SECTION: the buttons under the board. "New round" clears the board
+      to play again, keeping your scores. "Reset scores" sets the scores
+      back to zero. The ids let script.js notice when each one is clicked.
+    -->
     <div class="actions">
       <button type="button" class="primary" id="newRound">New round</button>
       <button type="button" class="ghost" id="resetScores">Reset scores</button>
     </div>
   </main>
 
+  <!--
+    This line loads the behavior file (script.js). It is placed at the
+    very bottom of the body on purpose: the browser reads a page from top
+    to bottom, and the script needs all of the elements above (the board,
+    the buttons, and so on) to already exist before it can find and use
+    them.
+  -->
   <script src="script.js"></script>
 </body>
 </html>

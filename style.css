@@ -1,15 +1,72 @@
+/*
+  =====================================================================
+  style.css - the LOOK of the game
+  =====================================================================
+  CSS stands for "Cascading Style Sheets". While index.html decides WHAT
+  is on the page, CSS decides HOW it looks: colors, sizes, spacing, and
+  layout.
+
+  A CSS file is a list of "rules". Each rule has two parts:
+
+      selector {
+        property: value;
+      }
+
+  - The "selector" picks which things on the page to style. For example,
+    "h1" means "every heading level 1", and ".cell" (with a dot) means
+    "everything whose class is cell". "#id" (with a hash) would pick the
+    one element with that id.
+  - Each "property: value;" line is one instruction, such as
+    "color: red;". The semicolon ends the instruction.
+
+  A comment in CSS (like this one) starts with a slash and a star, and
+  ends with a star and a slash. The browser ignores comments.
+  =====================================================================
+*/
+
+
+/*
+  ---------------------------------------------------------------------
+  COLOR PALETTE (the "variables")
+  ---------------------------------------------------------------------
+  A "CSS variable" is a named value you define once and reuse many times,
+  like writing "favorite color = teal" on a sticky note. Its name starts
+  with two dashes, for example --bg, and you use it later by writing
+  var(--bg). If we ever want to change a color, we change it in this one
+  place and the whole page updates.
+
+  ":root" is a special selector that means "the whole page", so these
+  variables are available everywhere.
+
+  Colors here are written as "hex codes" such as #f4f1ea. A hex code is a
+  short way to describe a color using a six-character code, where the
+  pairs of characters stand for how much red, green, and blue to mix in.
+  "rgba(0, 0, 0, 0.06)" is another way to write a color: red, green, and
+  blue amounts, plus an "alpha" value that sets transparency (0 is
+  invisible, 1 is fully solid).
+*/
 :root {
-  --bg: #f4f1ea;
-  --surface: #ffffff;
-  --text: #1f2328;
-  --muted: #6b7076;
-  --line: #d9d4c9;
-  --x: #e4572e;
-  --o: #2e86ab;
-  --win: #ffe08a;
+  --bg: #f4f1ea;       /* page background (a warm off-white) */
+  --surface: #ffffff;  /* background of cards, squares, and buttons */
+  --text: #1f2328;     /* main text color (a near-black) */
+  --muted: #6b7076;    /* softer gray for less important text */
+  --line: #d9d4c9;     /* thin borders and the gaps between squares */
+  --x: #e4572e;        /* color used for X (orange-red) */
+  --o: #2e86ab;        /* color used for O (blue) */
+  --win: #ffe08a;      /* highlight color for the three winning squares */
+  /* A "shadow" is a soft darker glow behind a box that makes it look lifted off the page. */
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 6px 20px rgba(0, 0, 0, 0.06);
 }
 
+/*
+  DARK MODE.
+  A "media query" (written @media) is a rule that only applies when a
+  certain condition is true. Here the condition is "prefers-color-scheme:
+  dark", which is true when the visitor has set their phone or computer
+  to use dark mode. In that case we replace the colors above with darker
+  versions. Everything on the page uses var(...), so it all switches
+  automatically.
+*/
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #15171a;
@@ -24,66 +81,103 @@
   }
 }
 
+
+/*
+  ---------------------------------------------------------------------
+  BASIC SETUP FOR THE WHOLE PAGE
+  ---------------------------------------------------------------------
+*/
+
+/*
+  The "*" selector means "every element". The "box-sizing: border-box"
+  setting changes how sizes are counted so that padding (the empty space
+  inside a box) and borders are included in the width you set, instead of
+  being added on top. Without this, boxes end up bigger than you expect
+  and layouts get hard to predict.
+*/
 * { box-sizing: border-box; }
 
+/* "body" is the whole visible page. */
 body {
-  margin: 0;
-  min-height: 100vh;
-  background: var(--bg);
-  color: var(--text);
+  margin: 0;                /* "margin" is empty space OUTSIDE a box; remove the browser's default gap */
+  min-height: 100vh;        /* at least as tall as the window ("vh" means 1 percent of the window's height, so 100vh is the full height) */
+  background: var(--bg);    /* use the page background color from the palette */
+  color: var(--text);       /* default text color */
+  /* A "font stack" is a list of fonts to try in order. The browser uses the first one the visitor's device has; "system-ui" is the device's own standard font, and "sans-serif" is a plain fallback. */
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* "Flexbox" (display: flex) is a layout tool that arranges the items inside a box in a row or column. Here it is used to center the game horizontally. */
   display: flex;
-  justify-content: center;
-  padding: 32px 16px;
+  justify-content: center;  /* push the content to the horizontal middle */
+  padding: 32px 16px;       /* inside spacing: 32px top and bottom, 16px left and right ("px" means pixels, the tiny dots that make up a screen) */
 }
 
+/* The main game container (the <main class="app"> from the HTML). */
 .app {
-  width: 100%;
-  max-width: 420px;
+  width: 100%;              /* take the full width available... */
+  max-width: 420px;         /* ...but never wider than 420px, so the game stays a nice size on big screens */
   display: flex;
-  flex-direction: column;
-  gap: 20px;
+  flex-direction: column;   /* stack the children (title, scores, board...) top to bottom */
+  gap: 20px;                /* space between each stacked item */
 }
 
+/* The "Tic Tac Toe" heading. */
 h1 {
   margin: 0;
   text-align: center;
-  font-size: 2rem;
-  letter-spacing: -0.02em;
+  font-size: 2rem;          /* "rem" is a size relative to the page's base text size; 2rem is twice as big as normal text */
+  letter-spacing: -0.02em;  /* squeeze the letters very slightly closer together; "em" is a size relative to the current font size */
 }
 
+/* Make buttons and drop-downs use the same font and color as the rest of the page (browsers normally give them their own look). "inherit" means "copy the setting from the parent". */
 button, select { font: inherit; color: inherit; }
 
+
+/*
+  ---------------------------------------------------------------------
+  GAME SETTINGS ROW (mode buttons and difficulty menu)
+  ---------------------------------------------------------------------
+*/
+
+/* The row that holds the mode buttons on the left and difficulty menu on the right. */
 .controls {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: wrap;                  /* if there is not enough room, let items drop onto a second line (helps on narrow phones) */
   gap: 12px;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: space-between;   /* push items to the two far edges */
+  align-items: center;              /* line items up vertically in the middle */
 }
 
+/* The rounded pill that holds the "vs Computer" and "2 Players" buttons. */
 .segmented {
-  display: inline-flex;
+  display: inline-flex;             /* like flex, but only as wide as its contents */
   background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 10px;
+  border: 1px solid var(--line);    /* a thin outline: 1 pixel wide, solid, in the line color */
+  border-radius: 10px;              /* rounded corners; bigger numbers are rounder */
   padding: 3px;
 }
 
+/* One of the two mode buttons. */
 .mode {
-  border: 0;
+  border: 0;                        /* remove the browser's default button border */
   background: transparent;
   padding: 8px 14px;
   border-radius: 7px;
-  cursor: pointer;
-  color: var(--muted);
+  cursor: pointer;                  /* show the pointing-hand mouse cursor so people know it is clickable */
+  color: var(--muted);              /* unselected buttons use the softer gray */
 }
 
+/*
+  ".mode.active" (no space between the two names) means "an element that
+  has BOTH the mode class AND the active class". script.js adds or
+  removes "active" to show which mode is selected, so the chosen button
+  looks filled in.
+*/
 .mode.active {
   background: var(--text);
   color: var(--bg);
 }
 
+/* The "Difficulty" label and its drop-down menu, side by side. */
 .difficulty {
   display: flex;
   align-items: center;
@@ -92,8 +186,14 @@ button, select { font: inherit; color: inherit; }
   font-size: 0.9rem;
 }
 
+/*
+  Added by script.js when playing against a person. "visibility: hidden"
+  makes the element invisible but keeps its space reserved, so the rest of
+  the page does not jump around when it appears or disappears.
+*/
 .difficulty.hidden { visibility: hidden; }
 
+/* The drop-down menu. */
 select {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -101,12 +201,26 @@ select {
   padding: 6px 8px;
 }
 
+
+/*
+  ---------------------------------------------------------------------
+  SCOREBOARD
+  ---------------------------------------------------------------------
+*/
+
+/*
+  The scoreboard is laid out with "CSS Grid" (display: grid), a tool for
+  arranging items in rows and columns like a spreadsheet.
+  "repeat(3, 1fr)" means "make 3 columns, each taking one equal share
+  ('fr' is a fraction of the available space)".
+*/
 .scoreboard {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
 }
 
+/* One score box (X, Draws, or O). */
 .score {
   background: var(--surface);
   border: 1px solid var(--line);
@@ -114,66 +228,110 @@ select {
   padding: 10px;
   text-align: center;
   display: flex;
-  flex-direction: column;
+  flex-direction: column;           /* put the name above the number */
   gap: 2px;
 }
 
-.score .label { font-size: 0.8rem; color: var(--muted); }
-.score .value { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
-.score.x .value { color: var(--x); }
-.score.o .value { color: var(--o); }
+.score .label { font-size: 0.8rem; color: var(--muted); }   /* ".score .label" (with a space) means "a label INSIDE a score box"; this is the small caption */
+/* "tabular-nums" makes every digit the same width so the numbers do not wiggle sideways as they change. */
+.score .value { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }   /* the big number; weight 700 means bold */
+.score.x .value { color: var(--x); }   /* X's number is drawn in X's color... */
+.score.o .value { color: var(--o); }   /* ...and O's number in O's color */
 
+
+/*
+  ---------------------------------------------------------------------
+  STATUS MESSAGE ("Your turn", "You win!", ...)
+  ---------------------------------------------------------------------
+*/
 .status {
   margin: 0;
   text-align: center;
   font-size: 1.15rem;
   font-weight: 600;
-  min-height: 1.5em;
+  min-height: 1.5em;                /* always reserve room for one line of text so the board does not move when the message is empty */
 }
 
+
+/*
+  ---------------------------------------------------------------------
+  THE GAME BOARD AND ITS SQUARES
+  ---------------------------------------------------------------------
+*/
+
+/*
+  The board is a 3-column grid. Notice that the board's own background is
+  the "line" color and the gaps between squares let that color show
+  through, which is how the grid lines are drawn without any extra
+  graphics.
+*/
 .board {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
-  aspect-ratio: 1;
+  aspect-ratio: 1;                  /* keep width and height equal (a ratio of 1 to 1) so the board is always a perfect square */
   background: var(--line);
   padding: 8px;
   border-radius: 16px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow);        /* the soft lifted look defined in the palette */
 }
 
+/* One square on the board (each is a button so it can be clicked or reached with the keyboard). */
 .cell {
   border: 0;
   background: var(--surface);
   border-radius: 10px;
+  /* clamp(smallest, preferred, largest) picks a size that grows with the screen but never goes below or above the limits. "vw" means 1 percent of the window's width. This makes the X and O marks scale with the board. */
   font-size: clamp(2.5rem, 14vw, 4.5rem);
   font-weight: 800;
   cursor: pointer;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s;
-  line-height: 1;
+  align-items: center;              /* center the X or O vertically... */
+  justify-content: center;          /* ...and horizontally inside the square */
+  transition: background 0.15s;     /* a "transition" makes a change happen smoothly over time (here 0.15 seconds) instead of instantly */
+  line-height: 1;                   /* remove extra vertical space around the text so it centers neatly */
 }
 
+/*
+  ":hover" applies while the mouse pointer is over the element.
+  ":not(:disabled)" means "unless the element is switched off", so squares
+  that already have a mark do not react. "color-mix" blends two colors; this
+  one mixes 85 percent of the square color with 15 percent of the text color
+  to make it slightly darker (or lighter in dark mode).
+*/
 .cell:hover:not(:disabled) { background: color-mix(in srgb, var(--surface) 85%, var(--text)); }
-.cell:disabled { cursor: default; }
+.cell:disabled { cursor: default; }   /* a switched-off square shows the normal arrow cursor, not the clickable hand */
+/* ":focus-visible" applies when someone moves to the square using the keyboard (Tab key). The outline shows them which square is selected, which is important for people who do not use a mouse. */
 .cell:focus-visible { outline: 3px solid var(--o); outline-offset: -3px; }
-.cell.x { color: var(--x); }
-.cell.o { color: var(--o); }
-.cell.win { background: var(--win); }
+.cell.x { color: var(--x); }          /* script.js adds the class "x" to squares holding an X... */
+.cell.o { color: var(--o); }          /* ...and "o" to squares holding an O */
+.cell.win { background: var(--win); } /* script.js adds "win" to the three squares in a winning line */
 
+/* script.js adds "placed" to a square for a moment right after a move, which plays the "pop" animation below. */
 .cell.placed { animation: pop 0.18s ease-out; }
 
+/*
+  "@keyframes" describes an animation as a series of steps. This one is
+  named "pop". It starts ("from") small and see-through, and ends ("to")
+  at full size and fully visible, so a new mark seems to pop into place.
+  "transform: scale(0.6)" shrinks it to 60 percent of its size and
+  "opacity" is how solid it is (0 is invisible, 1 is solid).
+*/
 @keyframes pop {
   from { transform: scale(0.6); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
 
+
+/*
+  ---------------------------------------------------------------------
+  BUTTONS UNDER THE BOARD ("New round" and "Reset scores")
+  ---------------------------------------------------------------------
+*/
 .actions {
   display: flex;
   gap: 10px;
-  justify-content: center;
+  justify-content: center;          /* center the two buttons */
 }
 
 .actions button {
@@ -183,17 +341,28 @@ select {
   font-weight: 600;
 }
 
+/* The main, eye-catching button ("New round"): solid dark background. */
 .primary {
   background: var(--text);
   color: var(--bg);
   border: 1px solid var(--text);
 }
 
+/* The quieter button ("Reset scores"): no fill, just an outline. */
 .ghost {
   background: transparent;
   border: 1px solid var(--line);
 }
 
+
+/*
+  ---------------------------------------------------------------------
+  ACCESSIBILITY: RESPECT "REDUCED MOTION"
+  ---------------------------------------------------------------------
+  Some people feel dizzy or sick from animations on screen, so their phone
+  or computer has a "reduce motion" setting. This media query notices that
+  setting and turns off the pop animation for those visitors.
+*/
 @media (prefers-reduced-motion: reduce) {
   .cell.placed { animation: none; }
 }
